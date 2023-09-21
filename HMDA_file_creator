@@ -1,0 +1,34 @@
+## IMPORTS ## 
+import pandas as pd 
+import requests 
+import io
+import os
+import csv
+get_ipython().run_line_magic('store', '-r States')
+
+
+## DEFINE FUNCTION TO CREATE CSV FOR ALL STATES HMDA DATA ## 
+
+def get_state_data(state_list):
+    
+    years = '2022'
+    action_taken = '1,6'
+    path = r'ENTER YOUR PATH HERE'
+    
+    for state in state_list:       
+        
+        URL = f'https://ffiec.cfpb.gov/v2/data-browser-api/view/csv?states={state}&years={years}&actions_taken={action_taken}'     
+        response = requests.get(URL)
+        df = pd.read_csv(io.StringIO(response.text), sep=',', quoting=csv.QUOTE_ALL)
+        columns = df.columns.to_list()
+        final_path = os.path.join(path,state)+('.csv')
+        df.to_csv(final_path, index=True)
+        
+        print(f'{years} HMDA data for {state} has been successfully downloaded:'
+          ,'\nNumber of rows:',len(df)
+          ,'\nNumber of columns:',f'{len(columns):,}'
+          ,'\nCSV file available at:',final_path)
+    
+    return
+
+get_state_data(States)
