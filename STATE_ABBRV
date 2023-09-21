@@ -1,0 +1,50 @@
+## IMPORTS 
+
+import requests 
+import pandas as pd 
+from bs4 import BeautifulSoup
+
+
+## URL CONTAINING STATE/TERRITORY ABBREVIATIONS ## 
+
+URL = 'https://www.faa.gov/air_traffic/publications/atpubs/cnt_html/appendix_a.html'
+
+
+
+## USE .GET TO CALL SERVER, REPORT STATUS CODE AND SAVE RESPONSE VARIABLE ## 
+
+response = requests.get(URL)
+
+if response.status_code == 200:
+    print('Successful Request')
+    
+else:
+    print('Request Failed for: ',response.status_code)
+
+
+## USE BEAUTIFULSOUP TO PARSE HTML TABLE AND SAVE TO PANDAS DATAFRAME ## 
+
+soup = BeautifulSoup(response.content,"html.parser")
+
+table = soup.find("table").prettify()
+
+df = pd.read_html(table)
+df = df[0]
+
+
+
+## COPY ABBREVIATIONS FROM THE THREE COLUMNS TO A SINGLE LIST ## 
+
+States = [] 
+columns = (['STATE(TERRITORY).1','STATE(TERRITORY).3','STATE(TERRITORY).5'])
+for columns in columns:
+    States += df[columns].to_list()
+
+
+
+## PRINT SUMMARY AND STORE STATES VARIABLE ## 
+
+get_ipython().run_line_magic('store', 'States')
+
+print(len(States),'State/Territory abbreviations have been extracted from:',URL)
+
